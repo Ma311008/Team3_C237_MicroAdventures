@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <title><%= experience.title %></title>
+</head>
+<body>
+  <%- include('partials/navbar.ejs') %>
+
+  <div class="container mt-5" style="max-width: 700px;">
+    <h1><%= experience.title %></h1>
+    <h6 class="text-muted"><%= experience.category %> &middot; <%= experience.difficulty %> &middot; <%= experience.location %></h6>
+    <p class="mt-3"><%= experience.description %></p>
+
+    <% if (completion) { %>
+      <div class="alert alert-success">
+        Completed on <%= completion.completed_at.toISOString().split('T')[0] %>
+        <% if (completion.rating) { %> &middot; Rating: <%= completion.rating %>/5 <% } %>
+        <% if (completion.notes) { %><br><%= completion.notes %><% } %>
+      </div>
+      <a href="/completions/<%= completion.id %>/edit" class="btn btn-outline-secondary btn-sm">Edit my entry</a>
+      <form action="/completions/<%= completion.id %>/delete" method="POST" class="d-inline">
+        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Remove this from your completed list?')">Remove</button>
+      </form>
+    <% } else { %>
+      <form action="/experiences/<%= experience.id %>/complete" method="POST" class="mt-4">
+        <h5>Mark as completed</h5>
+        <div class="form-group mb-3">
+          <label for="completed_at">Date completed:</label>
+          <input type="date" id="completed_at" name="completed_at" class="form-control" required>
+        </div>
+        <div class="form-group mb-3">
+          <label for="rating">Rating (1-5):</label>
+          <input type="number" id="rating" name="rating" min="1" max="5" class="form-control">
+        </div>
+        <div class="form-group mb-3">
+          <label for="notes">Notes:</label>
+          <textarea id="notes" name="notes" class="form-control"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Mark Complete</button>
+      </form>
+    <% } %>
+
+    <a href="/explore" class="d-block mt-4">&larr; Back to Explore</a>
+  </div>
+</body>
+</html>

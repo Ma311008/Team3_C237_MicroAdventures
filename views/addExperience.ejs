@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <title>Add Experience</title>
+</head>
+<body>
+  <%- include('partials/navbar.ejs') %>
+
+  <div class="container mt-5" style="max-width: 600px;">
+    <h1>Add Experience</h1>
+    <form action="/experiences" method="POST" class="mt-4">
+      <div class="form-group mb-3">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" class="form-control" required>
+      </div>
+      <div class="form-group mb-3">
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" class="form-control"></textarea>
+      </div>
+      <div class="form-group mb-3">
+        <label for="category">Category:</label>
+        <select id="category" name="category" class="form-select" required>
+          <option value="food">Food</option>
+          <option value="nature">Nature</option>
+          <option value="culture">Culture</option>
+          <option value="nightlife">Nightlife</option>
+          <option value="shopping">Shopping</option>
+        </select>
+      </div>
+      <div class="form-group mb-3">
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" class="form-control">
+      </div>
+      <div class="form-group mb-3">
+        <label for="difficulty">Difficulty:</label>
+        <select id="difficulty" name="difficulty" class="form-select" required>
+          <option value="easy">Easy</option>
+          <option value="moderate">Moderate</option>
+          <option value="challenging">Challenging</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Add Experience</button>
+    </form>
+  </div>
+</body>
+</html>
