@@ -42,3 +42,8 @@ CREATE TABLE completions (
 -- Login: admin@adventure.com / admin123
 INSERT INTO users (username, email, password, role)
 VALUES ('admin', 'admin@adventure.com', SHA1('admin123'), 'admin');
+
+-- Seed one explorer account for grading/testing (regular-user login).
+-- Login: explorer@adventure.com / explorer123
+INSERT INTO users (username, email, password, role)
+VALUES ('demo_explorer', 'explorer@adventure.com', SHA1('explorer123'), 'explorer');
