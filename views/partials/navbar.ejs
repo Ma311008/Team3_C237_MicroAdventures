@@ -1,19 +1,20 @@
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/">Micro-Adventures</a>
+    <a class="navbar-brand" href="/">&#127757; Micro-Adventures</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="collapsibleNavbar">
       <ul class="navbar-nav">
         <% if (!user) { %>
-          <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
-          <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+          <li class="nav-item"><a class="nav-link <%= currentPath === '/register' ? 'active fw-bold' : '' %>" href="/register">Register</a></li>
+          <li class="nav-item"><a class="nav-link <%= currentPath === '/login' ? 'active fw-bold' : '' %>" href="/login">Login</a></li>
         <% } else { %>
-          <li class="nav-item"><a class="nav-link" href="/explore">Explore</a></li>
-          <li class="nav-item"><a class="nav-link" href="/my-progress">My Progress</a></li>
+          <li class="nav-item"><a class="nav-link <%= currentPath === '/explore' ? 'active fw-bold' : '' %>" href="/explore">Explore</a></li>
+          <li class="nav-item"><a class="nav-link <%= currentPath === '/leaderboard' ? 'active fw-bold' : '' %>" href="/leaderboard">&#127942; Leaderboard</a></li>
+          <li class="nav-item"><a class="nav-link <%= currentPath === '/my-progress' ? 'active fw-bold' : '' %>" href="/my-progress">My Progress</a></li>
           <% if (user.role === 'admin') { %>
-            <li class="nav-item"><a class="nav-link" href="/experiences/new">Add Experience</a></li>
+            <li class="nav-item"><a class="nav-link <%= currentPath === '/experiences/new' ? 'active fw-bold' : '' %>" href="/experiences/new">Add Experience</a></li>
           <% } %>
           <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
         <% } %>

@@ -38,6 +38,13 @@ app.use(session({
 
 app.use(flash());
 
+// Makes the current path available in every view without changing every
+// res.render() call - used by the navbar partial to highlight the active link.
+app.use((req, res, next) => {
+    res.locals.currentPath = req.path;
+    next();
+});
+
 // ============================================================
 // Shared middleware
 // ============================================================
@@ -232,6 +239,27 @@ app.get('/my-progress', checkAuthenticated, (req, res) => {
             if (err2) throw err2;
             res.render('myProgress', { completed, badges, user: req.session.user });
         });
+    });
+});
+
+// ============================================================
+// BONUS: Leaderboard (not tied to a specific student's assigned feature -
+// built as extra credit on top of the required 5-way split)
+// ============================================================
+
+app.get('/leaderboard', checkAuthenticated, (req, res) => {
+    const sql = `
+        SELECT u.username, COUNT(c.id) AS total_reviews, ROUND(AVG(c.rating), 1) AS avg_rating_given
+        FROM users u
+        JOIN completions c ON c.user_id = u.id
+        WHERE u.role = 'explorer'
+        GROUP BY u.id
+        ORDER BY total_reviews DESC
+        LIMIT 10
+    `;
+    connection.query(sql, (error, leaders) => {
+        if (error) throw error;
+        res.render('leaderboard', { leaders, user: req.session.user });
     });
 });
 

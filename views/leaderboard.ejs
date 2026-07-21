@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <title>Leaderboard</title>
+</head>
+<body>
+  <%- include('partials/navbar.ejs') %>
+
+  <div class="container mt-5" style="max-width: 700px;">
+    <h1>&#127942; Top Explorers</h1>
+    <p class="text-muted">Ranked by number of experiences reviewed.</p>
+
+    <table class="table mt-4">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Explorer</th>
+          <th>Reviews Written</th>
+          <th>Average Rating Given</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% leaders.forEach(function(leader, index) { %>
+          <tr>
+            <td>
+              <% if (index === 0) { %>&#129351;<% } else if (index === 1) { %>&#129352;<% } else if (index === 2) { %>&#129353;<% } else { %>#<%= index + 1 %><% } %>
+            </td>
+            <td><%= leader.username %></td>
+            <td><%= leader.total_reviews %></td>
+            <td><%= leader.avg_rating_given %>/5</td>
+          </tr>
+        <% }); %>
+        <% if (leaders.length === 0) { %>
+          <tr><td colspan="4">No reviews yet - be the first to explore!</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
