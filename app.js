@@ -86,7 +86,7 @@ app.get('/', (req, res) => {
 // ============================================================
 
 app.get('/register', (req, res) => {
-    res.render('register', { messages: req.flash('error') });
+    res.render('register', { messages: req.flash('error'), user: req.session.user });
 });
 
 app.post('/register', validateRegistration, (req, res) => {
@@ -106,7 +106,7 @@ app.post('/register', validateRegistration, (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.render('login', { messages: req.flash('success'), errors: req.flash('error') });
+    res.render('login', { messages: req.flash('success'), errors: req.flash('error'), user: req.session.user });
 });
 
 app.post('/login', (req, res) => {
