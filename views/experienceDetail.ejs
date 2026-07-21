@@ -13,6 +13,14 @@
   <div class="container mt-5" style="max-width: 700px;">
     <h1><%= experience.title %></h1>
     <h6 class="text-muted"><%= experience.category %> &middot; <%= experience.difficulty %> &middot; <%= experience.location %></h6>
+    <p class="mb-1">
+      <% if (experience.review_count > 0) { %>
+        &#9733; <strong><%= experience.avg_rating %></strong> out of 5
+        <span class="text-muted">(<%= experience.review_count %> review<%= experience.review_count == 1 ? '' : 's' %>)</span>
+      <% } else { %>
+        <span class="text-muted">No reviews yet - be the first!</span>
+      <% } %>
+    </p>
     <p class="mt-3"><%= experience.description %></p>
 
     <% if (completion) { %>
@@ -42,6 +50,21 @@
         </div>
         <button type="submit" class="btn btn-success">Mark Complete</button>
       </form>
+    <% } %>
+
+    <hr class="mt-4">
+    <h5>Reviews</h5>
+    <% if (reviews.length === 0) { %>
+      <p class="text-muted">No one has reviewed this yet.</p>
+    <% } else { %>
+      <% reviews.forEach(function(review) { %>
+        <div class="border-bottom py-2">
+          <strong><%= review.username %></strong>
+          <% if (review.rating) { %> &middot; &#9733; <%= review.rating %>/5 <% } %>
+          <span class="text-muted">&middot; <%= review.completed_at.toISOString().split('T')[0] %></span>
+          <% if (review.notes) { %><p class="mb-0"><%= review.notes %></p><% } %>
+        </div>
+      <% }); %>
     <% } %>
 
     <a href="/explore" class="d-block mt-4">&larr; Back to Explore</a>

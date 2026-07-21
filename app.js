@@ -181,7 +181,15 @@ app.post('/experiences/:id/complete', checkAuthenticated, (req, res) => {
 
 app.get('/explore', checkAuthenticated, (req, res) => {
     // Base query - Student E extends this with search/filter/sort below
-    connection.query('SELECT * FROM experiences ORDER BY created_at DESC', (error, results) => {
+    // LEFT JOIN + GROUP BY so experiences with zero reviews still show up (avg_rating/review_count will be null/0)
+    const sql = `
+        SELECT e.*, ROUND(AVG(c.rating), 1) AS avg_rating, COUNT(c.id) AS review_count
+        FROM experiences e
+        LEFT JOIN completions c ON c.experience_id = e.id
+        GROUP BY e.id
+        ORDER BY e.created_at DESC
+    `;
+    connection.query(sql, (error, results) => {
         if (error) throw error;
         res.render('explore', { experiences: results, user: req.session.user, query: req.query });
     });
@@ -190,21 +198,39 @@ app.get('/explore', checkAuthenticated, (req, res) => {
 app.get('/experiences/:id', checkAuthenticated, (req, res) => {
     const experienceId = req.params.id;
 
-    connection.query('SELECT * FROM experiences WHERE id = ?', [experienceId], (error, expResults) => {
+    const summarySql = `
+        SELECT e.*, ROUND(AVG(c.rating), 1) AS avg_rating, COUNT(c.id) AS review_count
+        FROM experiences e
+        LEFT JOIN completions c ON c.experience_id = e.id
+        WHERE e.id = ?
+        GROUP BY e.id
+    `;
+    connection.query(summarySql, [experienceId], (error, expResults) => {
         if (error) throw error;
         if (expResults.length === 0) {
             return res.status(404).send('Experience not found');
         }
 
-        connection.query('SELECT * FROM completions WHERE experience_id = ? AND user_id = ?',
-            [experienceId, req.session.user.id], (err2, compResults) => {
-                if (err2) throw err2;
-                res.render('experienceDetail', {
-                    experience: expResults[0],
-                    completion: compResults.length > 0 ? compResults[0] : null,
-                    user: req.session.user
-                });
+        // All reviews left by any user, most recent first - what makes this feel like Google Reviews
+        const reviewsSql = `
+            SELECT c.*, u.username
+            FROM completions c
+            JOIN users u ON u.id = c.user_id
+            WHERE c.experience_id = ?
+            ORDER BY c.completed_at DESC
+        `;
+        connection.query(reviewsSql, [experienceId], (err2, reviews) => {
+            if (err2) throw err2;
+
+            const myReview = reviews.find(r => r.user_id === req.session.user.id) || null;
+
+            res.render('experienceDetail', {
+                experience: expResults[0],
+                reviews,
+                completion: myReview,
+                user: req.session.user
             });
+        });
     });
 });
 
@@ -320,13 +346,22 @@ app.post('/completions/:id/delete', checkAuthenticated, (req, res) => {
 app.get('/search', checkAuthenticated, (req, res) => {
     const { category, sort } = req.query;
 
-    let sql = 'SELECT * FROM experiences WHERE 1=1';
+    // Same avg_rating/review_count aggregate as /explore, since both routes
+    // render the same explore.ejs view - keep this pattern if extending search further.
+    let sql = `
+        SELECT e.*, ROUND(AVG(c.rating), 1) AS avg_rating, COUNT(c.id) AS review_count
+        FROM experiences e
+        LEFT JOIN completions c ON c.experience_id = e.id
+        WHERE 1=1
+    `;
     const params = [];
 
     if (category) {
-        sql += ' AND category = ?';
+        sql += ' AND e.category = ?';
         params.push(category);
     }
+
+    sql += ' GROUP BY e.id';
 
     if (sort === 'title') {
         sql += ' ORDER BY title ASC';
