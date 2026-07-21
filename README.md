@@ -9,6 +9,8 @@ Built with Node.js, Express, EJS, and MySQL (`mysql2`), following the patterns f
 (sessions, flash messages, role-based access middleware) plus the CRUD patterns used throughout
 the module.
 
+**Live app:** https://microadventures.onrender.com
+
 ## Setup
 
 1. Clone and install:
@@ -17,10 +19,11 @@ the module.
    cd Team3_C237_MicroAdventures
    npm install
    ```
-2. Create the database — run `schema.sql` in MySQL (creates `c237_adventuredb` and seeds one
-   admin account: `admin@adventure.com` / `admin123`).
-3. Check the DB credentials in `app.js` (`mysql.createConnection({...})`) match your local MySQL
-   setup (default: `root` with no password).
+2. Create the database — run `schema.sql` in MySQL (creates `c237_adventuredb` and seeds an
+   admin account: `admin@adventure.com` / `admin123`, and an explorer account:
+   `explorer@adventure.com` / `explorer123`).
+3. Copy `.env.example` to `.env` and fill in your own local MySQL credentials (host/port/user/
+   password/database name). `.env` is gitignored — never commit your real password.
 4. Start the app:
    ```
    npm start
@@ -46,11 +49,11 @@ modify it, and know it well enough to answer questions live.
 
 | Owner | Routes | Feature | Views |
 |---|---|---|---|
-| **A** | `GET/POST /register`, `GET/POST /login`, `GET /logout` | Registration, login, access control | `register.ejs`, `login.ejs` |
-| **B** | `GET /experiences/new`, `POST /experiences`, `POST /experiences/:id/complete` | Adding new experiences (admin) + marking one complete (explorer) | `addExperience.ejs` |
-| **C** | `GET /explore`, `GET /experiences/:id`, `GET /my-progress` | Browsing, detail view, personal dashboard (+ badges) | `explore.ejs`, `experienceDetail.ejs`, `myProgress.ejs` |
-| **D** | `GET/POST /experiences/:id/edit`, `GET/POST /completions/:id/edit` | Editing experiences (admin) + editing your own completion entry | `editExperience.ejs`, `editCompletion.ejs` |
-| **E** | `POST /experiences/:id/delete`, `POST /completions/:id/delete`, `GET /search` | Deleting records + search/filter/sort | (renders `explore.ejs`) |
+| **A — Chong Xuan Ming** | `GET/POST /register`, `GET/POST /login`, `GET /logout` | Registration, login, access control | `register.ejs`, `login.ejs` |
+| **B — Rohith** | `GET /experiences/new`, `POST /experiences`, `POST /experiences/:id/complete` | Adding new experiences (admin) + marking one complete (explorer) | `addExperience.ejs` |
+| **C — Muhammad Hakimi** | `GET /explore`, `GET /experiences/:id`, `GET /my-progress` | Browsing, detail view, personal dashboard (+ badges) | `explore.ejs`, `experienceDetail.ejs`, `myProgress.ejs` |
+| **D — Mohamed Jafin** | `GET/POST /experiences/:id/edit`, `GET/POST /completions/:id/edit` | Editing experiences (admin) + editing your own completion entry | `editExperience.ejs`, `editCompletion.ejs` |
+| **E — Donovan Tan** | `POST /experiences/:id/delete`, `POST /completions/:id/delete`, `GET /search` | Deleting records + search/filter/sort | (renders `explore.ejs`) |
 
 ## Roles
 
