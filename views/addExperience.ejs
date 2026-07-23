@@ -10,20 +10,38 @@
 <body>
   <%- include('partials/navbar.ejs') %>
 
-  <div class="container mt-5" style="max-width: 600px;">
+  <main class="container my-5" style="max-width: 700px;">
     <h1>Add Experience</h1>
-    <form action="/experiences" method="POST" class="mt-4">
-      <div class="form-group mb-3">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title" class="form-control" required>
+    <p class="text-muted">Create a local micro-adventure for explorers. Fields marked * are required.</p>
+
+    <% if (successMsg && successMsg.length > 0) { %>
+      <div class="alert alert-success">
+        <% successMsg.forEach(function(message) { %><p class="mb-0"><%= message %></p><% }); %>
       </div>
-      <div class="form-group mb-3">
-        <label for="description">Description:</label>
-        <textarea id="description" name="description" class="form-control"></textarea>
+    <% } %>
+    <% if (errorMsg && errorMsg.length > 0) { %>
+      <div class="alert alert-danger">
+        <% errorMsg.forEach(function(message) { %><p class="mb-0"><%= message %></p><% }); %>
       </div>
-      <div class="form-group mb-3">
-        <label for="category">Category:</label>
+    <% } %>
+
+    <form action="/experiences" method="POST" class="mt-4" id="addExperienceForm">
+      <div class="mb-3">
+        <label for="title" class="form-label">Title *</label>
+        <input type="text" id="title" name="title" class="form-control" minlength="3" maxlength="100"
+               placeholder="e.g. Sunrise walk at Marina Barrage" required>
+        <div class="form-text">Use 3–100 characters.</div>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description *</label>
+        <textarea id="description" name="description" class="form-control" rows="5" minlength="10"
+                  maxlength="1000" placeholder="Describe what explorers can see and do..." required></textarea>
+        <div class="form-text">Use 10–1000 characters.</div>
+      </div>
+      <div class="mb-3">
+        <label for="category" class="form-label">Category *</label>
         <select id="category" name="category" class="form-select" required>
+          <option value="" selected disabled>Choose a category</option>
           <option value="food">Food</option>
           <option value="nature">Nature</option>
           <option value="culture">Culture</option>
@@ -31,20 +49,34 @@
           <option value="shopping">Shopping</option>
         </select>
       </div>
-      <div class="form-group mb-3">
-        <label for="location">Location:</label>
-        <input type="text" id="location" name="location" class="form-control">
+      <div class="mb-3">
+        <label for="location" class="form-label">Location *</label>
+        <input type="text" id="location" name="location" class="form-control" minlength="2" maxlength="150"
+               placeholder="e.g. Marina Barrage, Singapore" required>
+        <div class="form-text">Enter a recognisable place or neighbourhood.</div>
       </div>
-      <div class="form-group mb-3">
-        <label for="difficulty">Difficulty:</label>
+      <div class="mb-3">
+        <label for="difficulty" class="form-label">Difficulty *</label>
         <select id="difficulty" name="difficulty" class="form-select" required>
+          <option value="" selected disabled>Choose a difficulty</option>
           <option value="easy">Easy</option>
           <option value="moderate">Moderate</option>
           <option value="challenging">Challenging</option>
         </select>
+        <div class="form-text">Choose the effort level most visitors should expect.</div>
       </div>
-      <button type="submit" class="btn btn-primary">Add Experience</button>
+      <button type="submit" class="btn btn-primary" id="submitButton">Add Experience</button>
+      <a href="/explore" class="btn btn-outline-secondary ms-2">Back to Explore</a>
     </form>
-  </div>
+  </main>
+
+  <script>
+    document.getElementById('addExperienceForm').addEventListener('submit', function () {
+      if (!this.checkValidity()) return;
+      const button = document.getElementById('submitButton');
+      button.disabled = true;
+      button.textContent = 'Saving...';
+    });
+  </script>
 </body>
 </html>

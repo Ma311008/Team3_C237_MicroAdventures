@@ -67,8 +67,16 @@ const checkAdmin = (req, res, next) => {
         return next();
     } else {
         req.flash('error', 'Access denied');
-        res.redirect('/explore');
+        return res.redirect('/explore');
     }
+};
+
+const checkExplorer = (req, res, next) => {
+    if (req.session.user && req.session.user.role === 'explorer') {
+        return next();
+    }
+    req.flash('error', 'Completion tracking is only available to explorer accounts.');
+    return res.redirect('/explore');
 };
 
 const validateRegistration = (req, res, next) => {
@@ -151,36 +159,153 @@ app.get('/logout', (req, res) => {
 // (new experiences by admin, and marking an experience complete by explorers)
 // ============================================================
 
+const EXPERIENCE_CATEGORIES = ['food', 'nature', 'culture', 'nightlife', 'shopping'];
+const EXPERIENCE_DIFFICULTIES = ['easy', 'moderate', 'challenging'];
+
+const normaliseText = (value) => typeof value === 'string' ? value.trim() : '';
+
+const getTodayDateString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+const isValidDate = (value) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const [year, month, day] = value.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    return date.getUTCFullYear() === year
+        && date.getUTCMonth() === month - 1
+        && date.getUTCDate() === day;
+};
+
+const validateExperienceInput = (body) => {
+    const values = {
+        title: normaliseText(body.title),
+        description: normaliseText(body.description),
+        category: normaliseText(body.category).toLowerCase(),
+        location: normaliseText(body.location),
+        difficulty: normaliseText(body.difficulty).toLowerCase()
+    };
+    if (!values.title || !values.description || !values.category || !values.location || !values.difficulty) {
+        return { error: 'All experience fields are required.' };
+    }
+    if (values.title.length < 3 || values.title.length > 100) {
+        return { error: 'Title must be between 3 and 100 characters.' };
+    }
+    if (values.description.length < 10 || values.description.length > 1000) {
+        return { error: 'Description must be between 10 and 1000 characters.' };
+    }
+    if (values.location.length < 2 || values.location.length > 150) {
+        return { error: 'Location must be between 2 and 150 characters.' };
+    }
+    if (!EXPERIENCE_CATEGORIES.includes(values.category)) {
+        return { error: 'Please choose a valid category.' };
+    }
+    if (!EXPERIENCE_DIFFICULTIES.includes(values.difficulty)) {
+        return { error: 'Please choose a valid difficulty.' };
+    }
+    return { values };
+};
+
+const validateCompletionInput = (body) => {
+    const ratingText = normaliseText(body.rating);
+    const rating = Number(ratingText);
+    const notes = normaliseText(body.notes);
+    const completedAt = normaliseText(body.completed_at);
+    if (!ratingText || !completedAt) {
+        return { error: 'Rating and completion date are required.' };
+    }
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+        return { error: 'Rating must be a whole number from 1 to 5.' };
+    }
+    if (notes.length > 500) {
+        return { error: 'Notes must not exceed 500 characters.' };
+    }
+    if (!isValidDate(completedAt)) {
+        return { error: 'Please enter a valid completion date.' };
+    }
+    if (completedAt > getTodayDateString()) {
+        return { error: 'Completion date cannot be later than today.' };
+    }
+    return { values: { rating, notes, completedAt } };
+};
+
 app.get('/experiences/new', checkAuthenticated, checkAdmin, (req, res) => {
     res.render('addExperience', { user: req.session.user });
 });
 
 app.post('/experiences', checkAuthenticated, checkAdmin, (req, res) => {
-    const { title, description, category, location, difficulty } = req.body;
+    const validation = validateExperienceInput(req.body);
+    if (validation.error) {
+        req.flash('error', validation.error);
+        return res.redirect('/experiences/new');
+    }
+    const { title, description, category, location, difficulty } = validation.values;
     const sql = 'INSERT INTO experiences (title, description, category, location, difficulty, created_by) VALUES (?, ?, ?, ?, ?, ?)';
     connection.query(sql, [title, description, category, location, difficulty, req.session.user.id], (err) => {
         if (err) {
-            console.error('Error adding experience:', err);
-            req.flash('error', 'Could not add experience.');
+            console.error('Database error while adding experience:', err.message);
+            req.flash('error', 'We could not add the experience. Please try again.');
             return res.redirect('/experiences/new');
         }
-        req.flash('success', 'Experience added!');
-        res.redirect('/explore');
+        req.flash('success', 'Experience added successfully!');
+        return res.redirect('/explore');
     });
 });
 
-app.post('/experiences/:id/complete', checkAuthenticated, (req, res) => {
-    const experienceId = req.params.id;
-    const { rating, notes, completed_at } = req.body;
-    const sql = 'INSERT INTO completions (user_id, experience_id, rating, notes, completed_at) VALUES (?, ?, ?, ?, ?)';
-    connection.query(sql, [req.session.user.id, experienceId, rating, notes, completed_at], (err) => {
-        if (err) {
-            console.error('Error marking complete:', err);
-            req.flash('error', 'You may have already marked this experience as complete.');
-            return res.redirect('/experiences/' + experienceId);
+app.post('/experiences/:id/complete', checkAuthenticated, checkExplorer, (req, res) => {
+    const experienceId = Number(req.params.id);
+    if (!Number.isSafeInteger(experienceId) || experienceId <= 0) {
+        req.flash('error', 'Invalid experience selected.');
+        return res.redirect('/explore');
+    }
+    const validation = validateCompletionInput(req.body);
+    if (validation.error) {
+        req.flash('error', validation.error);
+        return res.redirect('/experiences/' + experienceId);
+    }
+
+    connection.query('SELECT id FROM experiences WHERE id = ?', [experienceId], (experienceError, experiences) => {
+        if (experienceError) {
+            console.error('Database error while checking experience:', experienceError.message);
+            req.flash('error', 'We could not check that experience. Please try again.');
+            return res.redirect('/explore');
         }
-        req.flash('success', 'Nice! Marked as completed.');
-        res.redirect('/experiences/' + experienceId);
+        if (experiences.length === 0) {
+            req.flash('error', 'Experience not found.');
+            return res.redirect('/explore');
+        }
+
+        const userId = req.session.user.id;
+        connection.query('SELECT id FROM completions WHERE user_id = ? AND experience_id = ?',
+            [userId, experienceId], (duplicateError, completions) => {
+                if (duplicateError) {
+                    console.error('Database error while checking completion:', duplicateError.message);
+                    req.flash('error', 'We could not save your completion. Please try again.');
+                    return res.redirect('/experiences/' + experienceId);
+                }
+                if (completions.length > 0) {
+                    req.flash('error', 'You have already completed this experience.');
+                    return res.redirect('/experiences/' + experienceId);
+                }
+
+                const { rating, notes, completedAt } = validation.values;
+                const sql = 'INSERT INTO completions (user_id, experience_id, rating, notes, completed_at) VALUES (?, ?, ?, ?, ?)';
+                connection.query(sql, [userId, experienceId, rating, notes, completedAt], (err) => {
+                    if (err) {
+                        console.error('Database error while marking experience complete:', err.message);
+                        req.flash('error', err.code === 'ER_DUP_ENTRY'
+                            ? 'You have already completed this experience.'
+                            : 'We could not save your completion. Please try again.');
+                        return res.redirect('/experiences/' + experienceId);
+                    }
+                    req.flash('success', 'Experience marked as completed!');
+                    return res.redirect('/experiences/' + experienceId);
+                });
+            });
     });
 });
 
