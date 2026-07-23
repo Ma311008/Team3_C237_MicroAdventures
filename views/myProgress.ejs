@@ -1,53 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <title>My Progress</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Progress</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
+
 <body>
-  <%- include('partials/navbar.ejs') %>
 
-  <div class="container mt-5">
-    <h1>My Progress</h1>
+<%- include('partials/navbar.ejs') %>
 
-    <% if (badges.length > 0) { %>
-      <div class="alert alert-warning mt-3">
-        <strong>Badges earned:</strong>
-        <% badges.forEach(function(b) { %>
-          <span class="badge bg-warning text-dark"><%= b.category %> Explorer (<%= b.total %>)</span>
-        <% }); %>
-      </div>
-    <% } %>
+<div class="container mt-5">
 
-    <table class="table mt-4">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Category</th>
-          <th>Completed On</th>
-          <th>Rating</th>
-          <th>Notes</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <% completed.forEach(function(item) { %>
-          <tr>
-            <td><a href="/experiences/<%= item.id %>"><%= item.title %></a></td>
-            <td><%= item.category %></td>
-            <td><%= item.completed_at.toISOString().split('T')[0] %></td>
-            <td><%= item.rating || '-' %></td>
-            <td><%= item.notes || '-' %></td>
-          </tr>
-        <% }); %>
-        <% if (completed.length === 0) { %>
-          <tr><td colspan="5">You haven't completed any experiences yet. <a href="/explore">Start exploring!</a></td></tr>
-        <% } %>
-      </tbody>
-    </table>
-  </div>
+    <div class="text-center mb-4">
+        <h1>My Progress</h1>
+        <p class="text-muted">
+            View your completed adventures and earned badges.
+        </p>
+    </div>
+
+    <!-- Badges -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-primary text-white">
+            🏅 Earned Badges
+        </div>
+
+        <div class="card-body">
+
+            <% if (badges.length > 0) { %>
+
+                <% badges.forEach(function(badge){ %>
+
+                    <span class="badge bg-success me-2 mb-2 fs-6">
+                        <%= badge.category.charAt(0).toUpperCase() + badge.category.slice(1) %> Explorer
+                    </span>
+
+                <% }) %>
+
+            <% } else { %>
+
+                <p class="text-muted mb-0">
+                    No badges earned yet. Complete 5 experiences in the same category to unlock one.
+                </p>
+
+            <% } %>
+
+        </div>
+
+    </div>
+
+    <!-- Completed Experiences -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-success text-white">
+            ✅ Completed Experiences
+        </div>
+
+        <div class="card-body">
+
+            <% if (completed.length > 0) { %>
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Rating</th>
+                                <th>Notes</th>
+                                <th>Completed On</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <% completed.forEach(function(exp){ %>
+
+                                <tr>
+
+                                    <td>
+
+                                        <strong><%= exp.title %></strong>
+
+                                    </td>
+
+                                    <td>
+
+                                        <span class="badge bg-primary">
+
+                                            <%= exp.category %>
+
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        <%= exp.rating %>/5 ⭐
+
+                                    </td>
+
+                                    <td>
+
+                                        <%= exp.notes || "No notes" %>
+
+                                    </td>
+
+                                    <td>
+
+                                        <%= new Date(exp.completed_at).toLocaleDateString() %>
+
+                                    </td>
+
+                                </tr>
+
+                            <% }) %>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            <% } else { %>
+
+                <div class="alert alert-info text-center">
+
+                    You haven't completed any experiences yet.
+
+                </div>
+
+            <% } %>
+
+        </div>
+
+    </div>
+
+    <div class="mt-4">
+
+        <a href="/explore" class="btn btn-secondary">
+
+            ← Back to Explore
+
+        </a>
+
+    </div>
+
+</div>
+
 </body>
 </html>
