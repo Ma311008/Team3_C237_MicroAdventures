@@ -16,8 +16,24 @@
 
   <div class="container mt-5">
 
+    <% if (successMsg && successMsg.length > 0) { %>
+      <div class="alert alert-success">
+        <% successMsg.forEach(function(message) { %>
+          <p class="mb-0"><%= message %></p>
+        <% }); %>
+      </div>
+    <% } %>
+
+    <% if (errorMsg && errorMsg.length > 0) { %>
+      <div class="alert alert-danger">
+        <% errorMsg.forEach(function(message) { %>
+          <p class="mb-0"><%= message %></p>
+        <% }); %>
+      </div>
+    <% } %>
+
     <div class="text-center mb-4">
-      <h1>Explore Experiences</h1>
+      <h1><%= typeof isSearch !== 'undefined' && isSearch ? 'Search Results' : 'Explore Experiences' %></h1>
       <p class="text-muted">
         Discover exciting micro-adventures around Singapore.
       </p>
@@ -27,6 +43,12 @@
     <form action="/search" method="GET" class="row g-2 mb-4">
 
       <div class="col-md-3">
+        <input type="text" name="q" class="form-control"
+               placeholder="Search title, location..."
+               value="<%= query && query.q ? query.q : '' %>">
+      </div>
+
+      <div class="col-md-2">
         <select name="category" class="form-select">
           <option value="">All Categories</option>
 
@@ -58,12 +80,33 @@
         </select>
       </div>
 
-      <div class="col-md-3">
+      <div class="col-md-2">
+        <select name="difficulty" class="form-select">
+          <option value="">All Difficulties</option>
+
+          <option value="easy"
+            <%= query && query.difficulty === 'easy' ? 'selected' : '' %>>
+            Easy
+          </option>
+
+          <option value="moderate"
+            <%= query && query.difficulty === 'moderate' ? 'selected' : '' %>>
+            Moderate
+          </option>
+
+          <option value="challenging"
+            <%= query && query.difficulty === 'challenging' ? 'selected' : '' %>>
+            Challenging
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
 
         <select name="sort" class="form-select">
 
           <option value="newest"
-            <%= query && query.sort === 'newest' ? 'selected' : '' %>>
+            <%= !query || !query.sort || query.sort === 'newest' ? 'selected' : '' %>>
             Newest First
           </option>
 
@@ -72,14 +115,25 @@
             Title A-Z
           </option>
 
+          <option value="difficulty"
+            <%= query && query.sort === 'difficulty' ? 'selected' : '' %>>
+            Difficulty
+          </option>
+
         </select>
 
       </div>
 
-      <div class="col-md-2">
+      <div class="col-md-1">
         <button class="btn btn-secondary w-100">
           Filter
         </button>
+      </div>
+
+      <div class="col-md-2">
+        <a href="/explore" class="btn btn-outline-secondary w-100">
+          Clear
+        </a>
       </div>
 
     </form>

@@ -42,6 +42,8 @@ app.use(flash());
 // res.render() call - used by the navbar partial to highlight the active link.
 app.use((req, res, next) => {
     res.locals.currentPath = req.path;
+    res.locals.successMsg = req.flash('success');
+    res.locals.errorMsg = req.flash('error');
     next();
 });
 
@@ -217,7 +219,7 @@ app.get('/experiences/:id', checkAuthenticated, (req, res) => {
 
 app.get('/my-progress', checkAuthenticated, (req, res) => {
     const sql = `
-        SELECT e.*, c.rating, c.notes, c.completed_at
+        SELECT e.*, c.id AS completion_id, c.rating, c.notes, c.completed_at
         FROM experiences e
         JOIN completions c ON c.experience_id = e.id
         WHERE c.user_id = ?
@@ -317,23 +319,38 @@ app.post('/completions/:id/edit', checkAuthenticated, (req, res) => {
 // ============================================================
 
 app.post('/experiences/:id/delete', checkAuthenticated, checkAdmin, (req, res) => {
-    connection.query('DELETE FROM experiences WHERE id = ?', [req.params.id], (err) => {
+    const experienceId = req.params.id;
+
+    // Remove linked completions first (FK constraint has no ON DELETE CASCADE)
+    connection.query('DELETE FROM completions WHERE experience_id = ?', [experienceId], (err) => {
         if (err) {
-            console.error('Error deleting experience:', err);
+            console.error('Error deleting completions for experience:', err);
             req.flash('error', 'Could not delete experience.');
             return res.redirect('/explore');
         }
-        req.flash('success', 'Experience deleted.');
-        res.redirect('/explore');
+
+        connection.query('DELETE FROM experiences WHERE id = ?', [experienceId], (err2) => {
+            if (err2) {
+                console.error('Error deleting experience:', err2);
+                req.flash('error', 'Could not delete experience.');
+                return res.redirect('/explore');
+            }
+            req.flash('success', 'Experience deleted.');
+            res.redirect('/explore');
+        });
     });
 });
 
 app.post('/completions/:id/delete', checkAuthenticated, (req, res) => {
     connection.query('DELETE FROM completions WHERE id = ? AND user_id = ?',
-        [req.params.id, req.session.user.id], (err) => {
+        [req.params.id, req.session.user.id], (err, result) => {
             if (err) {
                 console.error('Error deleting completion:', err);
                 req.flash('error', 'Could not remove your entry.');
+                return res.redirect('/my-progress');
+            }
+            if (result.affectedRows === 0) {
+                req.flash('error', 'Entry not found or you do not have permission to delete it.');
                 return res.redirect('/my-progress');
             }
             req.flash('success', 'Removed from your completed list.');
@@ -341,12 +358,11 @@ app.post('/completions/:id/delete', checkAuthenticated, (req, res) => {
         });
 });
 
-// Dedicated search route: builds a dynamic query from category/status/sort
-// filters and re-renders the same explore view. Kept separate from the
-// student C's base /explore route above so this logic is easy to point to
-// and explain on its own.
+// Dedicated search route: builds a dynamic query from category/difficulty/text/sort
+// filters and re-renders the same explore view. Kept separate from student C's
+// base /explore route so this logic is easy to point to and explain on its own.
 app.get('/search', checkAuthenticated, (req, res) => {
-    const { category, sort } = req.query;
+    const { category, difficulty, sort, q } = req.query;
 
     let sql = 'SELECT * FROM experiences WHERE 1=1';
     const params = [];
@@ -356,15 +372,37 @@ app.get('/search', checkAuthenticated, (req, res) => {
         params.push(category);
     }
 
+    if (difficulty) {
+        sql += ' AND difficulty = ?';
+        params.push(difficulty);
+    }
+
+    if (q && q.trim()) {
+        sql += ' AND (title LIKE ? OR description LIKE ? OR location LIKE ?)';
+        const term = `%${q.trim()}%`;
+        params.push(term, term, term);
+    }
+
     if (sort === 'title') {
         sql += ' ORDER BY title ASC';
+    } else if (sort === 'difficulty') {
+        sql += ' ORDER BY FIELD(difficulty, "easy", "moderate", "challenging"), title ASC';
     } else {
         sql += ' ORDER BY created_at DESC';
     }
 
     connection.query(sql, params, (error, results) => {
-        if (error) throw error;
-        res.render('explore', { experiences: results, user: req.session.user, query: req.query });
+        if (error) {
+            console.error('Search error:', error);
+            req.flash('error', 'Could not run search.');
+            return res.redirect('/explore');
+        }
+        res.render('explore', {
+            experiences: results,
+            user: req.session.user,
+            query: req.query,
+            isSearch: true
+        });
     });
 });
 

@@ -15,6 +15,22 @@
 
 <div class="container mt-5">
 
+    <% if (successMsg && successMsg.length > 0) { %>
+        <div class="alert alert-success">
+            <% successMsg.forEach(function(message) { %>
+                <p class="mb-0"><%= message %></p>
+            <% }); %>
+        </div>
+    <% } %>
+
+    <% if (errorMsg && errorMsg.length > 0) { %>
+        <div class="alert alert-danger">
+            <% errorMsg.forEach(function(message) { %>
+                <p class="mb-0"><%= message %></p>
+            <% }); %>
+        </div>
+    <% } %>
+
     <div class="text-center mb-4">
         <h1>My Progress</h1>
         <p class="text-muted">
@@ -78,6 +94,7 @@
                                 <th>Rating</th>
                                 <th>Notes</th>
                                 <th>Completed On</th>
+                                <th>Actions</th>
 
                             </tr>
 
@@ -120,6 +137,28 @@
                                     <td>
 
                                         <%= new Date(exp.completed_at).toLocaleDateString() %>
+
+                                    </td>
+
+                                    <td>
+
+                                        <% if (exp.completion_id) { %>
+
+                                            <form action="/completions/<%= exp.completion_id %>/delete"
+                                                  method="POST"
+                                                  class="d-inline">
+
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        onclick="return confirm('Remove this completion from your list?')">
+
+                                                    Delete
+
+                                                </button>
+
+                                            </form>
+
+                                        <% } %>
 
                                     </td>
 
