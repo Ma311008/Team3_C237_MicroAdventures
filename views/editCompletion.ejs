@@ -11,7 +11,29 @@
   <%- include('partials/navbar.ejs') %>
 
   <div class="container mt-5" style="max-width: 600px;">
+
+  <div class="card shadow">
+    <div class="card-body">
     <h1>Edit My Entry</h1>
+    <% if(messages.length){ %>
+
+<div class="alert alert-success">
+
+<%= messages[0] %>
+
+</div>
+
+<% } %>
+
+<% if(errors.length){ %>
+
+<div class="alert alert-danger">
+
+<%= errors[0] %>
+
+</div>
+
+<% } %>
     <form action="/completions/<%= completion.id %>/edit" method="POST" class="mt-4">
       <div class="form-group mb-3">
         <label for="completed_at">Date completed:</label>
@@ -19,15 +41,70 @@
                value="<%= completion.completed_at.toISOString().split('T')[0] %>" required>
       </div>
       <div class="form-group mb-3">
-        <label for="rating">Rating (1-5):</label>
-        <input type="number" id="rating" name="rating" min="1" max="5" class="form-control" value="<%= completion.rating %>">
-      </div>
+
+<label for="rating">
+
+Rating
+
+</label>
+
+<select
+name="rating"
+class="form-select">
+
+<option value="1"
+<%= completion.rating==1 ? "selected" : "" %>>
+
+★☆☆☆☆
+
+</option>
+
+<option value="2"
+<%= completion.rating==2 ? "selected" : "" %>>
+
+★★☆☆☆
+
+</option>
+
+<option value="3"
+<%= completion.rating==3 ? "selected" : "" %>>
+
+★★★☆☆
+
+</option>
+
+<option value="4"
+<%= completion.rating==4 ? "selected" : "" %>>
+
+★★★★☆
+
+</option>
+
+<option value="5"
+<%= completion.rating==5 ? "selected" : "" %>>
+
+★★★★★
+
+</option>
+
+</select>
+
+</div>
       <div class="form-group mb-3">
         <label for="notes">Notes:</label>
-        <textarea id="notes" name="notes" class="form-control"><%= completion.notes %></textarea>
+        <textarea
+id="notes"
+name="notes"
+class="form-control"
+maxlength="300"
+placeholder="Share your experience..."><%= completion.notes %></textarea>
       </div>
       <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
+        </form>
+
+    </div>
   </div>
+
+</div>
 </body>
 </html>

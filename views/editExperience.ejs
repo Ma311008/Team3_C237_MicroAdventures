@@ -8,10 +8,34 @@
   <title>Edit Experience</title>
 </head>
 <body>
+  <body>
   <%- include('partials/navbar.ejs') %>
 
   <div class="container mt-5" style="max-width: 600px;">
-    <h1>Edit Experience</h1>
+
+    <div class="card shadow">
+      <div class="card-body">
+
+        <h1>Edit Experience</h1>
+    <% if(messages.length){ %>
+
+<div class="alert alert-success">
+
+<%= messages[0] %>
+
+</div>
+
+<% } %>
+
+<% if(errors.length){ %>
+
+<div class="alert alert-danger">
+
+<%= errors[0] %>
+
+</div>
+
+<% } %>
     <form action="/experiences/<%= experience.id %>/edit" method="POST" class="mt-4">
       <div class="form-group mb-3">
         <label for="title">Title:</label>
@@ -41,8 +65,26 @@
           <% }); %>
         </select>
       </div>
-      <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
+      <div class="d-flex gap-2 mt-4">
+
+    <a href="/explore" class="btn btn-secondary">
+        ← Back
+    </a>
+
+    <button type="reset" class="btn btn-warning">
+        Reset
+    </button>
+
+    <button type="submit" class="btn btn-primary">
+        Save Changes
+    </button>
+
+</div>
+        </form>
+
+      </div>
+    </div>
+
   </div>
 </body>
 </html>
