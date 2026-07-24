@@ -95,7 +95,7 @@ app.get('/', (req, res) => {
 // ============================================================
 
 app.get('/register', (req, res) => {
-    res.render('register', { messages: req.flash('error'), user: req.session.user });
+    res.render('register', { user: req.session.user });
 });
 
 app.post('/register', validateRegistration, (req, res) => {
@@ -115,7 +115,7 @@ app.post('/register', validateRegistration, (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.render('login', { messages: req.flash('success'), errors: req.flash('error'), user: req.session.user });
+    res.render('login', { user: req.session.user });
 });
 
 app.post('/login', (req, res) => {
@@ -190,7 +190,15 @@ app.post('/experiences/:id/complete', checkAuthenticated, (req, res) => {
 
 app.get('/explore', checkAuthenticated, (req, res) => {
     // Base query - Student E extends this with search/filter/sort below
-    connection.query('SELECT * FROM experiences ORDER BY created_at DESC', (error, results) => {
+    // LEFT JOIN + GROUP BY so experiences with zero reviews still show up (avg_rating/review_count will be null/0)
+    const sql = `
+        SELECT e.*, ROUND(AVG(c.rating), 1) AS avg_rating, COUNT(c.id) AS review_count
+        FROM experiences e
+        LEFT JOIN completions c ON c.experience_id = e.id
+        GROUP BY e.id
+        ORDER BY e.created_at DESC
+    `;
+    connection.query(sql, (error, results) => {
         if (error) throw error;
         res.render('explore', { experiences: results, user: req.session.user, query: req.query });
     });
@@ -199,21 +207,39 @@ app.get('/explore', checkAuthenticated, (req, res) => {
 app.get('/experiences/:id', checkAuthenticated, (req, res) => {
     const experienceId = req.params.id;
 
-    connection.query('SELECT * FROM experiences WHERE id = ?', [experienceId], (error, expResults) => {
+    const summarySql = `
+        SELECT e.*, ROUND(AVG(c.rating), 1) AS avg_rating, COUNT(c.id) AS review_count
+        FROM experiences e
+        LEFT JOIN completions c ON c.experience_id = e.id
+        WHERE e.id = ?
+        GROUP BY e.id
+    `;
+    connection.query(summarySql, [experienceId], (error, expResults) => {
         if (error) throw error;
         if (expResults.length === 0) {
             return res.status(404).send('Experience not found');
         }
 
-        connection.query('SELECT * FROM completions WHERE experience_id = ? AND user_id = ?',
-            [experienceId, req.session.user.id], (err2, compResults) => {
-                if (err2) throw err2;
-                res.render('experienceDetail', {
-                    experience: expResults[0],
-                    completion: compResults.length > 0 ? compResults[0] : null,
-                    user: req.session.user
-                });
+        // All reviews left by any user, most recent first - what makes this feel like Google Reviews
+        const reviewsSql = `
+            SELECT c.*, u.username
+            FROM completions c
+            JOIN users u ON u.id = c.user_id
+            WHERE c.experience_id = ?
+            ORDER BY c.completed_at DESC
+        `;
+        connection.query(reviewsSql, [experienceId], (err2, reviews) => {
+            if (err2) throw err2;
+
+            const myCompletion = reviews.find(r => r.user_id === req.session.user.id) || null;
+
+            res.render('experienceDetail', {
+                experience: expResults[0],
+                reviews,
+                completion: myCompletion,
+                user: req.session.user
             });
+        });
     });
 });
 
@@ -276,9 +302,7 @@ app.get('/experiences/:id/edit', checkAuthenticated, checkAdmin, (req, res) => {
         const experience = results[0];
         res.render("editExperience", {
             experience,
-            user: req.session.user,
-            messages: req.flash("success"),
-            errors: req.flash("error")
+            user: req.session.user
         });
     });
 });
@@ -323,9 +347,7 @@ app.get('/completions/:id/edit', checkAuthenticated, (req, res) => {
             if (results.length === 0) return res.status(404).send('Completion not found');
             res.render('editCompletion', {
     completion: results[0],
-    user: req.session.user,
-    messages: req.flash('success'),
-    errors: req.flash('error')
+    user: req.session.user
 });
         });
 });
@@ -412,31 +434,40 @@ app.post('/completions/:id/delete', checkAuthenticated, (req, res) => {
 app.get('/search', checkAuthenticated, (req, res) => {
     const { category, difficulty, sort, q } = req.query;
 
-    let sql = 'SELECT * FROM experiences WHERE 1=1';
+    // Same avg_rating/review_count aggregate as /explore, since both routes
+    // render the same explore.ejs view - keep this pattern if extending search further.
+    let sql = `
+        SELECT e.*, ROUND(AVG(c.rating), 1) AS avg_rating, COUNT(c.id) AS review_count
+        FROM experiences e
+        LEFT JOIN completions c ON c.experience_id = e.id
+        WHERE 1=1
+    `;
     const params = [];
 
     if (category) {
-        sql += ' AND category = ?';
+        sql += ' AND e.category = ?';
         params.push(category);
     }
 
     if (difficulty) {
-        sql += ' AND difficulty = ?';
+        sql += ' AND e.difficulty = ?';
         params.push(difficulty);
     }
 
     if (q && q.trim()) {
-        sql += ' AND (title LIKE ? OR description LIKE ? OR location LIKE ?)';
+        sql += ' AND (e.title LIKE ? OR e.description LIKE ? OR e.location LIKE ?)';
         const term = `%${q.trim()}%`;
         params.push(term, term, term);
     }
 
+    sql += ' GROUP BY e.id';
+
     if (sort === 'title') {
-        sql += ' ORDER BY title ASC';
+        sql += ' ORDER BY e.title ASC';
     } else if (sort === 'difficulty') {
-        sql += ' ORDER BY FIELD(difficulty, "easy", "moderate", "challenging"), title ASC';
+        sql += ' ORDER BY FIELD(e.difficulty, "easy", "moderate", "challenging"), e.title ASC';
     } else {
-        sql += ' ORDER BY created_at DESC';
+        sql += ' ORDER BY e.created_at DESC';
     }
 
     connection.query(sql, params, (error, results) => {

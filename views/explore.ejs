@@ -158,6 +158,15 @@
                   <%= exp.category.charAt(0).toUpperCase() + exp.category.slice(1) %>
                 </span>
 
+                <p class="mb-2">
+                  <% if (exp.review_count > 0) { %>
+                    &#9733; <strong><%= exp.avg_rating %></strong>
+                    <span class="text-muted">(<%= exp.review_count %> review<%= exp.review_count == 1 ? '' : 's' %>)</span>
+                  <% } else { %>
+                    <span class="text-muted">No reviews yet</span>
+                  <% } %>
+                </p>
+
                 <p class="text-muted mb-2">
 
                   Difficulty:

@@ -12,9 +12,9 @@
 
   <div class="container mt-5" style="max-width: 500px;">
     <h1>Register</h1>
-    <% if (messages && messages.length > 0) { %>
+    <% if (errorMsg && errorMsg.length > 0) { %>
       <div class="alert alert-danger">
-        <% messages.forEach(function(message) { %>
+        <% errorMsg.forEach(function(message) { %>
           <p class="mb-0"><%= message %></p>
         <% }); %>
       </div>

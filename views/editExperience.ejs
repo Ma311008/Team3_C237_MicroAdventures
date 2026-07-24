@@ -8,7 +8,6 @@
   <title>Edit Experience</title>
 </head>
 <body>
-  <body>
   <%- include('partials/navbar.ejs') %>
 
   <div class="container mt-5" style="max-width: 600px;">
@@ -17,21 +16,21 @@
       <div class="card-body">
 
         <h1>Edit Experience</h1>
-    <% if(messages.length){ %>
+    <% if(successMsg && successMsg.length){ %>
 
 <div class="alert alert-success">
 
-<%= messages[0] %>
+<%= successMsg[0] %>
 
 </div>
 
 <% } %>
 
-<% if(errors.length){ %>
+<% if(errorMsg && errorMsg.length){ %>
 
 <div class="alert alert-danger">
 
-<%= errors[0] %>
+<%= errorMsg[0] %>
 
 </div>
 

@@ -15,21 +15,21 @@
   <div class="card shadow">
     <div class="card-body">
     <h1>Edit My Entry</h1>
-    <% if(messages.length){ %>
+    <% if(successMsg && successMsg.length){ %>
 
 <div class="alert alert-success">
 
-<%= messages[0] %>
+<%= successMsg[0] %>
 
 </div>
 
 <% } %>
 
-<% if(errors.length){ %>
+<% if(errorMsg && errorMsg.length){ %>
 
 <div class="alert alert-danger">
 
-<%= errors[0] %>
+<%= errorMsg[0] %>
 
 </div>
 
