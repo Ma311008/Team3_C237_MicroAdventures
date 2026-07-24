@@ -76,4 +76,18 @@ INSERT INTO experiences (title, description, category, location, difficulty, cre
  'shopping', 'Haji Lane, Kampong Glam', 'easy', @admin),
 ('Mustafa Centre, Little India',
  'Lose yourself in this sprawling 24-hour emporium selling literally everything: electronics, gold, groceries, perfume and beyond. A chaotic, thrilling maze that never sleeps in the heart of Little India. Come at 3am just because you can.',
- 'shopping', 'Syed Alwi Road, Little India', 'easy', @admin);
+ 'shopping', 'Syed Alwi Road, Little India', 'easy', @admin),
+
+-- ===== CHALLENGING =====
+('Bukit Timah Summit Trek',
+ 'Conquer Singapore''s highest hill on a steep, sweat-soaked trail winding through one of the world''s few urban primary rainforests. Scramble over exposed roots and rugged slopes as macaques watch from the canopy and cicadas roar around you. Reach the 164-metre summit marker and feel like you have earned every single step.',
+ 'nature', 'Bukit Timah Nature Reserve', 'challenging', @admin),
+('Pulau Ubin Ketam Mountain Bike Trail',
+ 'Take a bumboat back in time to rustic Pulau Ubin, then tackle the island''s unforgiving Ketam Mountain Bike Park. Grind up punishing climbs, weave through technical rock gardens and fly down dusty descents built for serious riders. Raw, remote and gloriously old-school Singapore.',
+ 'nature', 'Pulau Ubin', 'challenging', @admin),
+('Mala Xiang Guo Extreme Spice Challenge',
+ 'Pile your bowl high with lotus root, luncheon meat and greens, then dare the stall to crank the mala to maximum. Numbing Sichuan peppercorns and fiery chillies launch a slow-building inferno that separates the brave from the broken. Bring tissues, milk and a fearless tongue.',
+ 'food', 'Chinatown Food Street', 'challenging', @admin),
+('One-Day Heritage Districts Marathon',
+ 'Traverse Singapore''s cultural soul on foot in a single epic day, from Chinatown''s temples to Little India''s garlands, Kampong Glam''s mosque and Katong''s Peranakan shophouses. It is kilometres of pavement, endless photo stops and joyful sensory overload from dawn to dusk. Comfortable shoes are non-negotiable.',
+ 'culture', 'Chinatown to Katong', 'challenging', @admin);
