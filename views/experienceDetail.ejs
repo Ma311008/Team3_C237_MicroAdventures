@@ -13,6 +13,12 @@
 <body>
 <%- include('partials/navbar.ejs') %>
 
+<%
+  const categoryEmoji = { food: '🍜', nature: '🌳', culture: '🎭', nightlife: '🌃', shopping: '🛍️' }[experience.category] || '📍';
+  const categoryClass = { food: 'bg-warning text-dark', nature: 'bg-success', culture: 'bg-info text-dark', nightlife: 'bg-dark', shopping: 'bg-danger' }[experience.category] || 'bg-primary';
+  const difficultyClass = { easy: 'bg-success', moderate: 'bg-warning text-dark', challenging: 'bg-danger' }[experience.difficulty] || 'bg-secondary';
+%>
+
 <main class="container my-5">
   <div class="row justify-content-center">
     <div class="col-lg-8">
@@ -27,21 +33,20 @@
         </div>
       <% } %>
 
-      <div class="card shadow">
+      <div class="card shadow overflow-hidden">
+        <div class="p-4 p-md-5 text-white" style="background: var(--brand-gradient);">
+          <div class="fs-1 mb-2"><%= categoryEmoji %></div>
+          <h1 class="h2 mb-1"><%= experience.title %></h1>
+          <p class="mb-0 opacity-75">&#128205; <%= experience.location %></p>
+        </div>
         <div class="card-body">
-          <h2 class="card-title mb-3"><%= experience.title %></h2>
-
           <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
-            <% const categoryClass = { food: 'bg-warning text-dark', nature: 'bg-success', culture: 'bg-info text-dark', nightlife: 'bg-dark', shopping: 'bg-danger' }[experience.category] || 'bg-primary'; %>
             <span class="badge <%= categoryClass %>">
               <%= experience.category.charAt(0).toUpperCase() + experience.category.slice(1) %>
             </span>
-
-            <% const difficultyClass = { easy: 'bg-success', moderate: 'bg-warning text-dark', challenging: 'bg-danger' }[experience.difficulty] || 'bg-secondary'; %>
             <span class="badge <%= difficultyClass %>">
               <%= experience.difficulty.charAt(0).toUpperCase() + experience.difficulty.slice(1) %>
             </span>
-
             <% if (experience.review_count > 0) { %>
               <span class="badge bg-warning text-dark">
                 &#9733; <%= experience.avg_rating %> <span class="fw-normal">(<%= experience.review_count %> review<%= experience.review_count == 1 ? '' : 's' %>)</span>
@@ -51,11 +56,7 @@
             <% } %>
           </div>
 
-          <p class="card-text"><strong>Description:</strong><br><%= experience.description %></p>
-          <hr>
-          <div class="row">
-            <div class="col-md-6 mb-3"><strong>Location</strong><br><%= experience.location %></div>
-          </div>
+          <p class="card-text mb-0"><%= experience.description %></p>
         </div>
       </div>
 
@@ -64,7 +65,7 @@
           <% if (!completion) { %>
             <div class="card shadow">
               <div class="card-body">
-                <h4>Mark Experience as Completed</h4>
+                <h4>&#128221; Mark Experience as Completed</h4>
                 <p class="text-muted">Record when you completed this adventure and how you would rate it.</p>
                 <form action="/experiences/<%= experience.id %>/complete" method="POST" enctype="multipart/form-data" id="completionForm">
                   <div class="mb-3">
@@ -95,7 +96,7 @@
                     <input type="date" id="completed_at" name="completed_at" class="form-control" required>
                     <div class="form-text">The date cannot be later than today.</div>
                   </div>
-                  <button type="submit" class="btn btn-success" id="completionSubmitButton">
+                  <button type="submit" class="btn btn-success w-100" id="completionSubmitButton">
                     Mark as Completed
                   </button>
                 </form>
@@ -104,14 +105,14 @@
           <% } else { %>
             <div class="card border-success shadow">
               <div class="card-body">
-                <h4 class="text-success">You have already completed this experience.</h4>
+                <h4 class="text-success">&#9989; You have already completed this experience.</h4>
                 <hr>
                 <% if (completion.image) { %>
                   <img src="/images/<%= completion.image %>" alt="Your photo" class="img-fluid rounded mb-3" style="max-height: 300px;">
                 <% } %>
-                <p><strong>Rating:</strong> <%= completion.rating %>/5</p>
+                <p class="mb-2">&#9733; <strong><%= completion.rating %>/5</strong></p>
                 <p><strong>Your Notes:</strong><br><%= completion.notes || 'No notes added.' %></p>
-                <p><strong>Completed On:</strong> <%= new Date(completion.completed_at).toLocaleDateString() %></p>
+                <p class="text-muted small">Completed on <%= new Date(completion.completed_at).toLocaleDateString() %></p>
                 <a href="/completions/<%= completion.id %>/edit" class="btn btn-outline-primary btn-sm">
                   Edit completion
                 </a>
@@ -127,19 +128,27 @@
 
       <div class="card shadow mt-4">
         <div class="card-body">
-          <h4 class="mb-3">Reviews</h4>
+          <h4 class="mb-3">&#128172; Reviews</h4>
           <% if (reviews.length === 0) { %>
             <p class="text-muted mb-0">No one has reviewed this yet.</p>
           <% } else { %>
             <% reviews.forEach(function(review) { %>
-              <div class="border-bottom py-2">
-                <strong><%= review.username %></strong>
-                <% if (review.rating) { %> &middot; &#9733; <%= review.rating %>/5 <% } %>
-                <span class="text-muted">&middot; <%= new Date(review.completed_at).toLocaleDateString() %></span>
-                <% if (review.notes) { %><p class="mb-0"><%= review.notes %></p><% } %>
-                <% if (review.image) { %>
-                  <img src="/images/<%= review.image %>" alt="Photo from <%= review.username %>" class="img-fluid rounded mt-2" style="max-height: 220px;">
-                <% } %>
+              <div class="d-flex gap-3 py-3 border-bottom">
+                <div class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0"
+                     style="width: 42px; height: 42px; background: var(--brand-gradient); font-weight: 600;">
+                  <%= review.username.charAt(0).toUpperCase() %>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="d-flex align-items-center flex-wrap gap-2">
+                    <strong><%= review.username %></strong>
+                    <% if (review.rating) { %><span class="badge bg-warning text-dark">&#9733; <%= review.rating %>/5</span><% } %>
+                    <span class="text-muted small"><%= new Date(review.completed_at).toLocaleDateString() %></span>
+                  </div>
+                  <% if (review.notes) { %><p class="mb-2 mt-1"><%= review.notes %></p><% } %>
+                  <% if (review.image) { %>
+                    <img src="/images/<%= review.image %>" alt="Photo from <%= review.username %>" class="img-fluid rounded" style="max-height: 220px;">
+                  <% } %>
+                </div>
               </div>
             <% }); %>
           <% } %>
@@ -147,7 +156,7 @@
       </div>
 
       <div class="mt-4">
-        <a href="/explore" class="btn btn-secondary">Back to Explore</a>
+        <a href="/explore" class="btn btn-secondary">&larr; Back to Explore</a>
       </div>
     </div>
   </div>
