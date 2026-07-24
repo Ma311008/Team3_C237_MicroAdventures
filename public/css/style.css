@@ -150,3 +150,36 @@ h1, h2, h3, h4, h5 {
   animation: fadeInUp 0.55s ease both, floatBlob 5s ease-in-out 0.55s infinite;
   display: inline-block;
 }
+
+/* ===== Bubbling background (shown on all pages once logged in) ===== */
+.bubbles-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.bubbles-bg span {
+  position: absolute;
+  bottom: -140px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.16), rgba(236, 72, 153, 0.16));
+  animation: bubbleRise linear infinite;
+}
+
+@keyframes bubbleRise {
+  0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-110vh) translateX(30px) scale(1.15); opacity: 0; }
+}
+
+.bubbles-bg span:nth-child(1) { left: 5%;  width: 40px; height: 40px; animation-duration: 18s; animation-delay: 0s; }
+.bubbles-bg span:nth-child(2) { left: 18%; width: 22px; height: 22px; animation-duration: 13s; animation-delay: 2s; }
+.bubbles-bg span:nth-child(3) { left: 32%; width: 60px; height: 60px; animation-duration: 22s; animation-delay: 4s; }
+.bubbles-bg span:nth-child(4) { left: 46%; width: 30px; height: 30px; animation-duration: 15s; animation-delay: 1s; }
+.bubbles-bg span:nth-child(5) { left: 60%; width: 50px; height: 50px; animation-duration: 20s; animation-delay: 6s; }
+.bubbles-bg span:nth-child(6) { left: 72%; width: 25px; height: 25px; animation-duration: 14s; animation-delay: 3s; }
+.bubbles-bg span:nth-child(7) { left: 84%; width: 45px; height: 45px; animation-duration: 19s; animation-delay: 5s; }
+.bubbles-bg span:nth-child(8) { left: 94%; width: 18px; height: 18px; animation-duration: 11s; animation-delay: 7s; }
