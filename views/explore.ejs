@@ -158,21 +158,20 @@
                   <%= exp.category.charAt(0).toUpperCase() + exp.category.slice(1) %>
                 </span>
 
-                <p class="mb-2">
+                <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
                   <% if (exp.review_count > 0) { %>
-                    &#9733; <strong><%= exp.avg_rating %></strong>
-                    <span class="text-muted">(<%= exp.review_count %> review<%= exp.review_count == 1 ? '' : 's' %>)</span>
+                    <span class="badge bg-warning text-dark">
+                      &#9733; <%= exp.avg_rating %> <span class="fw-normal">(<%= exp.review_count %>)</span>
+                    </span>
                   <% } else { %>
-                    <span class="text-muted">No reviews yet</span>
+                    <span class="badge bg-light text-muted border">No reviews yet</span>
                   <% } %>
-                </p>
 
-                <p class="text-muted mb-2">
-
-                  Difficulty:
-                  <strong><%= exp.difficulty %></strong>
-
-                </p>
+                  <% const difficultyClass = { easy: 'bg-success', moderate: 'bg-warning text-dark', challenging: 'bg-danger' }[exp.difficulty] || 'bg-secondary'; %>
+                  <span class="badge <%= difficultyClass %>">
+                    <%= exp.difficulty.charAt(0).toUpperCase() + exp.difficulty.slice(1) %>
+                  </span>
+                </div>
 
                 <p>
 
