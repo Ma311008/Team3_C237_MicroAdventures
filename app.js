@@ -10,7 +10,10 @@ const connection = mysql.createConnection({
     port: process.env.DB_PORT || 3306,
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'c237_adventuredb'
+    database: process.env.DB_NAME || 'c237_adventuredb',
+    // Azure Database for MySQL requires TLS - set DB_SSL=true in .env/Render env vars
+    // when connecting to Azure (filess.io and local MySQL don't need this).
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
 });
 
 
