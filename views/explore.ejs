@@ -157,7 +157,8 @@
                   <%= exp.title %>
                 </h4>
 
-                <span class="badge bg-primary mb-2">
+                <% const categoryClass = { food: 'bg-warning text-dark', nature: 'bg-success', culture: 'bg-info text-dark', nightlife: 'bg-dark', shopping: 'bg-danger' }[exp.category] || 'bg-primary'; %>
+                <span class="badge <%= categoryClass %> mb-2">
                   <%= exp.category.charAt(0).toUpperCase() + exp.category.slice(1) %>
                 </span>
 

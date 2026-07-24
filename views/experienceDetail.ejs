@@ -32,7 +32,8 @@
           <h2 class="card-title mb-3"><%= experience.title %></h2>
 
           <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
-            <span class="badge bg-primary">
+            <% const categoryClass = { food: 'bg-warning text-dark', nature: 'bg-success', culture: 'bg-info text-dark', nightlife: 'bg-dark', shopping: 'bg-danger' }[experience.category] || 'bg-primary'; %>
+            <span class="badge <%= categoryClass %>">
               <%= experience.category.charAt(0).toUpperCase() + experience.category.slice(1) %>
             </span>
 

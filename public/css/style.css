@@ -1,49 +1,152 @@
+:root {
+  --brand-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  --brand-start: #6366f1;
+  --brand-end: #ec4899;
+}
+
 body {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: #f7f8fa;
-}
-
-.navbar-brand {
-  font-weight: 600;
-  letter-spacing: 0.3px;
 }
 
 h1, h2, h3, h4, h5 {
   font-weight: 600;
 }
 
+/* ===== Navbar - gradient, app-like ===== */
+.navbar {
+  background: var(--brand-gradient) !important;
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.25);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.navbar .nav-link {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.navbar .nav-link:hover {
+  transform: translateY(-1px);
+  opacity: 0.85;
+}
+
+/* ===== Cards ===== */
 .card {
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .card.shadow-sm:hover,
 .card.shadow:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 1rem 2rem rgba(99, 102, 241, 0.15) !important;
 }
 
+/* ===== Buttons ===== */
 .btn {
   border-radius: 8px;
   font-weight: 500;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background: var(--brand-gradient);
+  border: none;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: var(--brand-gradient);
+  box-shadow: 0 0.5rem 1rem rgba(99, 102, 241, 0.35);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  border: none;
+}
+
+/* ===== Badges ===== */
 .badge {
   border-radius: 6px;
   font-weight: 500;
   padding: 0.4em 0.7em;
 }
 
+/* ===== Entrance animation - applies broadly, no per-page markup needed ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.container, .container-fluid {
+  animation: fadeInUp 0.35s ease both;
+}
+
+.row .card {
+  animation: fadeInUp 0.4s ease both;
+}
+
+/* ===== Auth pages (login/register) ===== */
 .auth-wrapper {
+  position: relative;
   min-height: calc(100vh - 56px);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   background: linear-gradient(135deg, #eef2ff 0%, #f7f8fa 100%);
 }
 
+@keyframes floatBlob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(24px, -18px) scale(1.08); }
+}
+
+.auth-wrapper::before,
+.auth-wrapper::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.35;
+  z-index: 0;
+  animation: floatBlob 9s ease-in-out infinite;
+}
+
+.auth-wrapper::before {
+  width: 320px;
+  height: 320px;
+  background: var(--brand-start);
+  top: -80px;
+  left: -80px;
+}
+
+.auth-wrapper::after {
+  width: 280px;
+  height: 280px;
+  background: var(--brand-end);
+  bottom: -70px;
+  right: -70px;
+  animation-delay: -4.5s;
+}
+
 .auth-card {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 420px;
+  animation: fadeInUp 0.55s ease both;
+}
+
+.auth-card .fs-1 {
+  animation: fadeInUp 0.55s ease both, floatBlob 5s ease-in-out 0.55s infinite;
+  display: inline-block;
 }
