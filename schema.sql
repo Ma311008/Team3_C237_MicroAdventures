@@ -1,10 +1,8 @@
 -- C237 CA2: Local Micro-Adventure Bucket List
--- Run this file to create the database and seed a starting admin account.
 
-CREATE DATABASE IF NOT EXISTS c237_adventuredb;
-USE c237_adventuredb;
+USE C237_015_team3;
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(50) UNIQUE NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
@@ -13,7 +11,7 @@ CREATE TABLE users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE experiences (
+CREATE TABLE IF NOT EXISTS experiences (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(100) NOT NULL,
   description TEXT,
@@ -25,7 +23,7 @@ CREATE TABLE experiences (
   FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
-CREATE TABLE completions (
+CREATE TABLE IF NOT EXISTS completions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
   experience_id INT NOT NULL,
@@ -40,10 +38,11 @@ CREATE TABLE completions (
 
 -- Seed one admin account so you can log in and add experiences immediately.
 -- Login: admin@adventure.com / admin123
-INSERT INTO users (username, email, password, role)
+-- INSERT IGNORE so re-running this file doesn't error on the UNIQUE constraint.
+INSERT IGNORE INTO users (username, email, password, role)
 VALUES ('admin', 'admin@adventure.com', SHA1('admin123'), 'admin');
 
 -- Seed one explorer account for grading/testing (regular-user login).
 -- Login: explorer@adventure.com / explorer123
-INSERT INTO users (username, email, password, role)
+INSERT IGNORE INTO users (username, email, password, role)
 VALUES ('demo_explorer', 'explorer@adventure.com', SHA1('explorer123'), 'explorer');
