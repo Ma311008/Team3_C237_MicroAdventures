@@ -14,34 +14,41 @@
   <%- include('partials/navbar.ejs') %>
 
   <div class="container mt-5" style="max-width: 700px;">
-    <h1>&#127942; Top Explorers</h1>
-    <p class="text-muted">Ranked by number of experiences reviewed.</p>
+    <div class="text-center mb-4">
+      <h1>&#127942; Top Explorers</h1>
+      <p class="text-muted">Ranked by number of experiences reviewed.</p>
+    </div>
 
-    <table class="table mt-4">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Explorer</th>
-          <th>Reviews Written</th>
-          <th>Average Rating Given</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% leaders.forEach(function(leader, index) { %>
-          <tr>
-            <td>
-              <% if (index === 0) { %>&#129351;<% } else if (index === 1) { %>&#129352;<% } else if (index === 2) { %>&#129353;<% } else { %>#<%= index + 1 %><% } %>
-            </td>
-            <td><%= leader.username %></td>
-            <td><%= leader.total_reviews %></td>
-            <td><%= leader.avg_rating_given %>/5</td>
-          </tr>
-        <% }); %>
+    <div class="card shadow-sm">
+      <div class="card-header text-white" style="background: var(--brand-gradient);">
+        Leaderboard
+      </div>
+      <div class="card-body p-0">
         <% if (leaders.length === 0) { %>
-          <tr><td colspan="4">No reviews yet - be the first to explore!</td></tr>
+          <div class="alert alert-info text-center m-3 mb-0">No reviews yet - be the first to explore!</div>
+        <% } else { %>
+          <ul class="list-group list-group-flush">
+            <% leaders.forEach(function(leader, index) { %>
+              <% const medal = index === 0 ? '&#129351;' : index === 1 ? '&#129352;' : index === 2 ? '&#129353;' : null; %>
+              <li class="list-group-item d-flex align-items-center justify-content-between <%= index < 3 ? 'bg-light' : '' %>">
+                <div class="d-flex align-items-center gap-3">
+                  <span class="fs-4" style="width: 2.5rem; text-align: center;">
+                    <%- medal || ('#' + (index + 1)) %>
+                  </span>
+                  <div>
+                    <strong><%= leader.username %></strong>
+                    <div class="text-muted small"><%= leader.total_reviews %> review<%= leader.total_reviews == 1 ? '' : 's' %> written</div>
+                  </div>
+                </div>
+                <span class="badge bg-warning text-dark fs-6">
+                  &#9733; <%= leader.avg_rating_given %>/5
+                </span>
+              </li>
+            <% }); %>
+          </ul>
         <% } %>
-      </tbody>
-    </table>
+      </div>
+    </div>
   </div>
 </body>
 </html>

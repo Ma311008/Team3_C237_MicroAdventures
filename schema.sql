@@ -29,12 +29,19 @@ CREATE TABLE IF NOT EXISTS completions (
   experience_id INT NOT NULL,
   rating TINYINT,
   notes TEXT,
+  image VARCHAR(255) DEFAULT NULL,
   completed_at DATE NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (experience_id) REFERENCES experiences(id),
   UNIQUE KEY unique_completion (user_id, experience_id)
 );
+
+-- Upgrading a database that already has a completions table from before the
+-- image feature was added? Run this once (it will error harmlessly if the
+-- column already exists on a fresh install, since IF NOT EXISTS covers that
+-- on MySQL 8.0.29+; on older servers just skip this line on fresh installs):
+-- ALTER TABLE completions ADD COLUMN image VARCHAR(255) DEFAULT NULL;
 
 -- Seed one admin account so you can log in and add experiences immediately.
 -- Login: admin@adventure.com / admin123

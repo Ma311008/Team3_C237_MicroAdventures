@@ -44,7 +44,7 @@
     <!-- Badges -->
     <div class="card shadow-sm mb-4">
 
-        <div class="card-header bg-primary text-white">
+        <div class="card-header text-white" style="background: var(--brand-gradient);">
             🏅 Earned Badges
         </div>
 
@@ -54,7 +54,7 @@
 
                 <% badges.forEach(function(badge){ %>
 
-                    <span class="badge bg-success me-2 mb-2 fs-6">
+                    <span class="badge me-2 mb-2 fs-6 text-white" style="background: var(--brand-gradient);">
                         <%= badge.category.charAt(0).toUpperCase() + badge.category.slice(1) %> Explorer
                     </span>
 
@@ -76,7 +76,7 @@
 
     <div class="card shadow-sm">
 
-        <div class="card-header bg-success text-white">
+        <div class="card-header text-white" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%);">
             ✅ Completed Experiences
         </div>
 
@@ -92,6 +92,7 @@
 
                             <tr>
 
+                                <th>Photo</th>
                                 <th>Title</th>
                                 <th>Category</th>
                                 <th>Rating</th>
@@ -110,14 +111,22 @@
                                 <tr>
 
                                     <td>
+                                        <% if (exp.image) { %>
+                                            <img src="/images/<%= exp.image %>" alt="<%= exp.title %>" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                                        <% } else { %>
+                                            <span class="text-muted">&mdash;</span>
+                                        <% } %>
+                                    </td>
+
+                                    <td>
 
                                         <strong><%= exp.title %></strong>
 
                                     </td>
 
                                     <td>
-
-                                        <span class="badge bg-primary">
+                                        <% const categoryClass = { food: 'bg-warning text-dark', nature: 'bg-success', culture: 'bg-info text-dark', nightlife: 'bg-dark', shopping: 'bg-danger' }[exp.category] || 'bg-primary'; %>
+                                        <span class="badge <%= categoryClass %>">
 
                                             <%= exp.category %>
 

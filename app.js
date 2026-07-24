@@ -3,7 +3,17 @@ const express = require('express');
 const mysql = require('mysql2');
 const session = require('express-session');
 const flash = require('connect-flash');
+const multer = require('multer');
 const app = express();
+
+// Storage for review photos uploaded when marking an experience complete.
+// Filenames are timestamp-prefixed so two users uploading "photo.jpg" don't collide.
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => cb(null, 'public/images'),
+        filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+    })
+});
 
 const connection = mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
@@ -172,11 +182,12 @@ app.post('/experiences', checkAuthenticated, checkAdmin, (req, res) => {
     });
 });
 
-app.post('/experiences/:id/complete', checkAuthenticated, (req, res) => {
+app.post('/experiences/:id/complete', checkAuthenticated, upload.single('image'), (req, res) => {
     const experienceId = req.params.id;
     const { rating, notes, completed_at } = req.body;
-    const sql = 'INSERT INTO completions (user_id, experience_id, rating, notes, completed_at) VALUES (?, ?, ?, ?, ?)';
-    connection.query(sql, [req.session.user.id, experienceId, rating, notes, completed_at], (err) => {
+    const image = req.file ? req.file.filename : null;
+    const sql = 'INSERT INTO completions (user_id, experience_id, rating, notes, image, completed_at) VALUES (?, ?, ?, ?, ?, ?)';
+    connection.query(sql, [req.session.user.id, experienceId, rating, notes, image, completed_at], (err) => {
         if (err) {
             console.error('Error marking complete:', err);
             req.flash('error', 'You may have already marked this experience as complete.');
@@ -248,7 +259,7 @@ app.get('/experiences/:id', checkAuthenticated, (req, res) => {
 
 app.get('/my-progress', checkAuthenticated, (req, res) => {
     const sql = `
-        SELECT e.*, c.id AS completion_id, c.rating, c.notes, c.completed_at
+        SELECT e.*, c.id AS completion_id, c.rating, c.notes, c.image, c.completed_at
         FROM experiences e
         JOIN completions c ON c.experience_id = e.id
         WHERE c.user_id = ?
@@ -355,7 +366,7 @@ app.get('/completions/:id/edit', checkAuthenticated, (req, res) => {
         });
 });
 
-app.post('/completions/:id/edit', checkAuthenticated, (req, res) => {
+app.post('/completions/:id/edit', checkAuthenticated, upload.single('image'), (req, res) => {
     const { rating, notes, completed_at } = req.body;
     if(rating){
 
@@ -375,8 +386,10 @@ req.params.id +
 }
 
 }
-    const sql = 'UPDATE completions SET rating = ?, notes = ?, completed_at = ? WHERE id = ? AND user_id = ?';
-    connection.query(sql, [rating, notes, completed_at, req.params.id, req.session.user.id], (err) => {
+    // Keep the existing image unless a new one was uploaded
+    const image = req.file ? req.file.filename : req.body.currentImage;
+    const sql = 'UPDATE completions SET rating = ?, notes = ?, image = ?, completed_at = ? WHERE id = ? AND user_id = ?';
+    connection.query(sql, [rating, notes, image, completed_at, req.params.id, req.session.user.id], (err) => {
         if (err) {
             console.error('Error updating completion:', err);
             req.flash('error', 'Could not update your entry.');
